@@ -3,6 +3,10 @@
 angular.module('LoadingBarExample', ['chieffancypants.loadingBar', 'ngAnimate'])
   .config(function(cfpLoadingBarProvider) {
     cfpLoadingBarProvider.includeSpinner = true;
+    cfpLoadingBarProvider.latencyThreshold = 0;
+  })
+  .config(function($sceProvider) {
+    $sceProvider.enabled(false);
   })
 
   .controller('ExampleCtrl', function ($scope, $http, $timeout, cfpLoadingBar) {
@@ -24,8 +28,11 @@ angular.module('LoadingBarExample', ['chieffancypants.loadingBar', 'ngAnimate'])
 
     $scope.fetch = function() {
       $scope.subreddit = getRandomSubreddit();
-      $http.jsonp('http://www.reddit.com/r/' + $scope.subreddit + '.json?limit=50&jsonp=JSON_CALLBACK').success(function(data) {
-        $scope.posts = data.data.children;
+      $http.jsonp('http://www.reddit.com/r/' + $scope.subreddit + '.json', {
+        params: { limit: 50 },
+        jsonpCallbackParam: 'jsonp',
+      }).then(function(data) {
+        $scope.posts = data.data.data.children;
       });
     };
 

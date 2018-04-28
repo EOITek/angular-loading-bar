@@ -1,7 +1,7 @@
 /*! 
  * angular-loading-bar v0.9.0
  * https://chieffancypants.github.io/angular-loading-bar
- * Copyright (c) 2017 Wes Cruver
+ * Copyright (c) 2018 Wes Cruver
  * License: MIT
  */
 /*
@@ -208,7 +208,7 @@ angular.module('cfp.loadingBar', [])
         }
 
         if (includeSpinner) {
-          $animate.enter(spinner, $parent, loadingBarContainer);
+          $animate.enter(spinner, $parent, includeBar ? loadingBarContainer : $after);
         }
 
         _set(startSize);
@@ -304,9 +304,13 @@ angular.module('cfp.loadingBar', [])
       function _push(info) {
         $rootScope.$broadcast('cfpLoadingBar:loading', info);
         if (reqsTotal === 0) {
-          startTimeout = $timeout(function() {
+          if (latencyThreshold) {
+            startTimeout = $timeout(function() {
+              _start();
+            }, latencyThreshold);
+          } else {
             _start();
-          }, latencyThreshold);
+          }
         }
         reqsTotal++;
         _set(reqsCompleted / reqsTotal);
