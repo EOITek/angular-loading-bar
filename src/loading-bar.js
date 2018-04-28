@@ -298,9 +298,13 @@ angular.module('cfp.loadingBar', [])
       function _push(info) {
         $rootScope.$broadcast('cfpLoadingBar:loading', info);
         if (reqsTotal === 0) {
-          startTimeout = $timeout(function() {
+          if (latencyThreshold) {
+            startTimeout = $timeout(function() {
+              _start();
+            }, latencyThreshold);
+          } else {
             _start();
-          }, latencyThreshold);
+          }
         }
         reqsTotal++;
         _set(reqsCompleted / reqsTotal);
