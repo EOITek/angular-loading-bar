@@ -17,7 +17,6 @@
 angular.module('angular-loading-bar', ['cfp.loadingBarInterceptor']);
 angular.module('chieffancypants.loadingBar', ['cfp.loadingBarInterceptor']);
 
-
 /**
  * loadingBarInterceptor service
  *
@@ -115,11 +114,60 @@ angular.module('cfp.loadingBar', [])
     this.latencyThreshold = 100;
     this.startSize = 0.02;
     this.parentSelector = 'body';
-    this.spinnerTemplate = '<div id="loading-bar-spinner"><div class="spinner-icon"></div></div>';
-    this.loadingBarTemplate = '<div id="loading-bar"><div class="bar"><div class="peg"></div></div></div>';
+    this.spinnerTemplate = '<div id="loading-bar-spinner" class="loading-bar-el"><div class="spinner-icon"></div></div>';
+    this.loadingBarTemplate = '<div id="loading-bar" class="loading-bar-el"><div class="bar"><div class="peg"></div></div></div>';
 
-    this.$get = ['$injector', '$document', '$timeout', '$rootScope', function ($injector, $document, $timeout, $rootScope) {
-      var $animate;
+    this.$get = ['$q', '$document', '$timeout', '$rootScope', function ($q, $document, $timeout, $rootScope) {
+      /**
+       * Like $animate.enter, but doesn't depend on ngAnimate
+       * @param {Array<HTMLDivElement>} jqElement
+       * @param {Array<HTMLElement>} jqParent
+       * @param {Array<HTMLElement>} jqAfter
+       */
+      function animateEnter(jqElement, jqParent, jqAfter) {
+        var element = jqElement[0];
+        var parent = jqParent && jqParent[0];
+        var after = jqAfter && jqAfter[0];
+
+        element.style.opacity = 0;
+
+        if (!after || !!after.nextElementSibling) {
+          parent.appendChild(element);
+        } else {
+          parent.insertBefore(element, after);
+        }
+
+        element.style.opacity = '';
+
+        return $q(function (resolve) {
+          function onTransitionEnd(e) {
+            element.removeEventListener('transitionend', onTransitionEnd);
+            resolve(e);
+          }
+
+          element.addEventListener('transitionend', onTransitionEnd);
+        });
+      }
+
+      /**
+       * Like $animate.leave, but doesn't depend on ngAnimate
+       * @param {Array<HTMLDivElement>} jqElement
+       */
+      function animateLeave(jqElement) {
+        var element = jqElement[0];
+
+        element.style.opacity = 0;
+        return $q(function (resolve) {
+          function onTransitionEnd(e) {
+            element.removeEventListener('transitionend', onTransitionEnd);
+            element.parentElement.removeChild(element);
+            resolve(e);
+          }
+
+          element.addEventListener('transitionend', onTransitionEnd);
+        });
+      }
+
       var $parentSelector = this.parentSelector,
         loadingBarContainer = angular.element(this.loadingBarTemplate),
         loadingBar = loadingBarContainer.find('div').eq(0),
@@ -170,10 +218,6 @@ angular.module('cfp.loadingBar', [])
        * Inserts the loading bar element into the dom, and sets it to 2%
        */
       function _start() {
-        if (!$animate) {
-          $animate = $injector.get('$animate');
-        }
-
         $timeout.cancel(completeTimeout);
 
         // do not continually broadcast the started event:
@@ -187,7 +231,7 @@ angular.module('cfp.loadingBar', [])
           : $document.find($parentSelector)[0]
         ;
 
-        if (! parent) {
+        if (!parent) {
           parent = document.getElementsByTagName('body')[0];
         }
 
@@ -198,11 +242,11 @@ angular.module('cfp.loadingBar', [])
         started = true;
 
         if (includeBar) {
-          $animate.enter(loadingBarContainer, $parent, $after);
+          animateEnter(loadingBarContainer, $parent, $after);
         }
 
         if (includeSpinner) {
-          $animate.enter(spinner, $parent, includeBar ? loadingBarContainer : $after);
+          animateEnter(spinner, $parent, includeBar ? loadingBarContainer : $after);
         }
 
         _set(startSize);
@@ -277,20 +321,16 @@ angular.module('cfp.loadingBar', [])
       }
 
       function _complete() {
-        if (!$animate) {
-          $animate = $injector.get('$animate');
-        }
-
         _set(1);
         $timeout.cancel(completeTimeout);
 
         // Attempt to aggregate any start/complete calls within 500ms:
         completeTimeout = $timeout(function() {
-          var promise = $animate.leave(loadingBarContainer, _completeAnimation);
+          var promise = animateLeave(loadingBarContainer);
           if (promise && promise.then) {
             promise.then(_completeAnimation);
           }
-          $animate.leave(spinner);
+          animateLeave(spinner);
           $rootScope.$broadcast('cfpLoadingBar:completed');
         }, 500);
       }

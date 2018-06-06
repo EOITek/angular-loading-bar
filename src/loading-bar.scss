@@ -2,23 +2,7 @@ $loading-bar-color: #29d !default;
 
 #loading-bar {
   pointer-events: none;
-  transition: 350ms linear all;
-
-  &.ng-enter {
-    opacity: 0;
-
-    &.ng-enter-active {
-      opacity: 1;
-    }
-  }
-
-  &.ng-leave {
-    opacity: 1;
-
-    &.ng-leave-active {
-      opacity: 0;
-    }
-  }
+  transition: 350ms linear opacity;
 
   .bar {
     background: $loading-bar-color;
@@ -51,28 +35,12 @@ $loading-bar-color: #29d !default;
   pointer-events: none;
   position: fixed;
   top: 10px;
-  transition: 350ms linear all;
+  transition: 350ms linear opacity;
   z-index: 10002;
-
-  &.ng-enter {
-    opacity: 0;
-
-    &.ng-enter-active {
-      opacity: 1;
-    }
-  }
-
-  &.ng-leave {
-    opacity: 1;
-
-    &.ng-leave-active {
-      opacity: 0;
-    }
-  }
 
   .spinner-icon {
     animation: loading-bar-spinner 400ms linear infinite;
-    border:  solid 2px transparent;
+    border: solid 2px transparent;
     border-left-color: $loading-bar-color;
     border-radius: 50%;
     border-top-color:  $loading-bar-color;

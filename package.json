@@ -4,6 +4,8 @@
   "description": "An automatic loading bar for AngularJS",
   "main": "index.js",
   "files": [
+    "src/loading-bar.js",
+    "src/loading-bar.scss",
     "build/loading-bar.js",
     "build/loading-bar.css"
   ],
@@ -31,8 +33,8 @@
   },
   "homepage": "https://chieffancypants.github.io/angular-loading-bar",
   "devDependencies": {
-    "autoprefixer": "^8.3.0",
-    "grunt": "^1.0.2",
+    "autoprefixer": "^8.6.0",
+    "grunt": "^1.0.3",
     "grunt-contrib-concat": "^1.0.1",
     "grunt-contrib-cssmin": "^2.2.1",
     "grunt-contrib-jshint": "^1.1.0",
@@ -44,8 +46,8 @@
     "jasmine-core": "^3.1.0",
     "karma": "^2.0.2",
     "karma-coffee-preprocessor": "^1.0.1",
-    "karma-coverage": "^1.1.1",
-    "karma-jasmine": "^1.1.1",
+    "karma-coverage": "^1.1.2",
+    "karma-jasmine": "^1.1.2",
     "karma-phantomjs-launcher": "^1.0.4"
   }
 }
