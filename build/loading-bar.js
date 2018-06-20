@@ -166,7 +166,11 @@ angular.module('cfp.loadingBar', [])
         return $q(function (resolve) {
           function onTransitionEnd(e) {
             element.removeEventListener('transitionend', onTransitionEnd);
-            element.parentElement.removeChild(element);
+            if (element.remove) {
+              element.remove();
+            } else {
+              element.parentElement.removeChild(element);
+            }
             resolve(e);
           }
 
